@@ -17,12 +17,29 @@ const (
 	symbolChars = "!@#$%^&*()-_=+[]{}<>?"
 )
 
-// defaultLength は既定の桁数。
-const defaultLength = 12
+// 桁数の既定値と上限。
+const (
+	DefaultLength = 12
+	MaxLength     = 25
+)
 
-// Generate は大文字・小文字・数字・記号をすべて含む12桁のパスワードを生成する。
-func Generate() (string, error) {
-	return generate(defaultLength, []string{upperChars, lowerChars, digitChars, symbolChars})
+// Options はパスワード生成の設定。
+type Options struct {
+	// Length は生成するパスワードの桁数。
+	Length int
+}
+
+// DefaultOptions は既定の設定を返す。
+func DefaultOptions() Options {
+	return Options{Length: DefaultLength}
+}
+
+// Generate は opts に従い、大文字・小文字・数字・記号をすべて含むパスワードを生成する。
+func Generate(opts Options) (string, error) {
+	if opts.Length > MaxLength {
+		return "", fmt.Errorf("桁数（%d）は%d以下にしてください", opts.Length, MaxLength)
+	}
+	return generate(opts.Length, []string{upperChars, lowerChars, digitChars, symbolChars})
 }
 
 // generate は charsets の各文字種を最低1文字ずつ含む、length 桁のパスワードを生成する。

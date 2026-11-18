@@ -11,13 +11,13 @@ func TestGenerate(t *testing.T) {
 	allowed := upperChars + lowerChars + digitChars + symbolChars
 
 	for range iterations {
-		pw, err := Generate()
+		pw, err := Generate(DefaultOptions())
 		if err != nil {
 			t.Fatalf("Generate() がエラーを返しました: %v", err)
 		}
 
-		if len(pw) != defaultLength {
-			t.Fatalf("桁数 = %d, want %d（%q）", len(pw), defaultLength, pw)
+		if len(pw) != DefaultLength {
+			t.Fatalf("桁数 = %d, want %d（%q）", len(pw), DefaultLength, pw)
 		}
 
 		for _, cs := range []string{upperChars, lowerChars, digitChars, symbolChars} {
@@ -35,17 +35,32 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestGenerateLength(t *testing.T) {
-	charsets := []string{upperChars, lowerChars, digitChars, symbolChars}
-
-	for _, length := range []int{4, 8, 12, 32, 64} {
+	for _, length := range []int{4, 5, 8, 16, 24, MaxLength} {
 		for range iterations {
-			pw, err := generate(length, charsets)
+			pw, err := Generate(Options{Length: length})
 			if err != nil {
-				t.Fatalf("generate(%d) がエラーを返しました: %v", length, err)
+				t.Fatalf("Generate(Length=%d) がエラーを返しました: %v", length, err)
 			}
 			if len(pw) != length {
 				t.Fatalf("桁数 = %d, want %d（%q）", len(pw), length, pw)
 			}
+			for _, cs := range []string{upperChars, lowerChars, digitChars, symbolChars} {
+				if !strings.ContainsAny(pw, cs) {
+					t.Fatalf("%q に文字種 %q の文字が含まれていません", pw, cs)
+				}
+			}
+		}
+	}
+}
+
+func TestGenerateInvalidLength(t *testing.T) {
+	for _, length := range []int{3, 1, 0, -1, MaxLength + 1, 1000000000} {
+		pw, err := Generate(Options{Length: length})
+		if err == nil {
+			t.Fatalf("Generate(Length=%d) でエラーが返されませんでした（結果 %q）", length, pw)
+		}
+		if pw != "" {
+			t.Fatalf("エラー時に空でない文字列 %q が返されました", pw)
 		}
 	}
 }
@@ -55,7 +70,7 @@ func TestGenerateExcludesDisabledCharsets(t *testing.T) {
 	disabled := upperChars + symbolChars
 
 	for range iterations {
-		pw, err := generate(defaultLength, enabled)
+		pw, err := generate(DefaultLength, enabled)
 		if err != nil {
 			t.Fatalf("generate がエラーを返しました: %v", err)
 		}
