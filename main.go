@@ -1,6 +1,18 @@
 // go-pass はパスワード用のランダムな文字列を生成するCLIツール。
 package main
 
+import (
+	"fmt"
+	"os"
+
+	"github.com/masakiwakabayashi/go-pass/internal/password"
+)
+
 func main() {
-	// TODO: password.Generate を呼び出し、結果を標準出力に表示する。
+	pw, err := password.Generate()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "エラー:", err)
+		os.Exit(1)
+	}
+	fmt.Println(pw)
 }
