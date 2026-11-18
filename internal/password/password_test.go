@@ -65,6 +65,90 @@ func TestGenerateInvalidLength(t *testing.T) {
 	}
 }
 
+func TestGenerateNoSymbols(t *testing.T) {
+	opts := Options{Length: DefaultLength, NoSymbols: true}
+
+	for range iterations {
+		pw, err := Generate(opts)
+		if err != nil {
+			t.Fatalf("Generate がエラーを返しました: %v", err)
+		}
+		if len(pw) != DefaultLength {
+			t.Fatalf("桁数 = %d, want %d（%q）", len(pw), DefaultLength, pw)
+		}
+		if strings.ContainsAny(pw, symbolChars) {
+			t.Fatalf("%q に記号が含まれています", pw)
+		}
+		for _, cs := range []string{upperChars, lowerChars, digitChars} {
+			if !strings.ContainsAny(pw, cs) {
+				t.Fatalf("%q に文字種 %q の文字が含まれていません", pw, cs)
+			}
+		}
+	}
+}
+
+func TestGenerateNoSymbolsMinLength(t *testing.T) {
+	// 記号なしでは有効な文字種が3つなので、3桁は生成でき、2桁はエラーになる。
+	if _, err := Generate(Options{Length: 3, NoSymbols: true}); err != nil {
+		t.Fatalf("3桁でエラーが返されました: %v", err)
+	}
+	if pw, err := Generate(Options{Length: 2, NoSymbols: true}); err == nil {
+		t.Fatalf("2桁でエラーが返されませんでした（結果 %q）", pw)
+	}
+}
+
+func TestGenerateNoUpper(t *testing.T) {
+	opts := Options{Length: DefaultLength, NoUpper: true}
+
+	for range iterations {
+		pw, err := Generate(opts)
+		if err != nil {
+			t.Fatalf("Generate がエラーを返しました: %v", err)
+		}
+		if len(pw) != DefaultLength {
+			t.Fatalf("桁数 = %d, want %d（%q）", len(pw), DefaultLength, pw)
+		}
+		if strings.ContainsAny(pw, upperChars) {
+			t.Fatalf("%q に大文字が含まれています", pw)
+		}
+		for _, cs := range []string{lowerChars, digitChars, symbolChars} {
+			if !strings.ContainsAny(pw, cs) {
+				t.Fatalf("%q に文字種 %q の文字が含まれていません", pw, cs)
+			}
+		}
+	}
+}
+
+func TestGenerateNoSymbolsNoUpper(t *testing.T) {
+	opts := Options{Length: DefaultLength, NoSymbols: true, NoUpper: true}
+
+	for range iterations {
+		pw, err := Generate(opts)
+		if err != nil {
+			t.Fatalf("Generate がエラーを返しました: %v", err)
+		}
+		if len(pw) != DefaultLength {
+			t.Fatalf("桁数 = %d, want %d（%q）", len(pw), DefaultLength, pw)
+		}
+		if strings.ContainsAny(pw, upperChars+symbolChars) {
+			t.Fatalf("%q に大文字か記号が含まれています", pw)
+		}
+		for _, cs := range []string{lowerChars, digitChars} {
+			if !strings.ContainsAny(pw, cs) {
+				t.Fatalf("%q に文字種 %q の文字が含まれていません", pw, cs)
+			}
+		}
+	}
+
+	// 有効な文字種は2つなので、2桁は生成でき、1桁はエラーになる。
+	if _, err := Generate(Options{Length: 2, NoSymbols: true, NoUpper: true}); err != nil {
+		t.Fatalf("2桁でエラーが返されました: %v", err)
+	}
+	if pw, err := Generate(Options{Length: 1, NoSymbols: true, NoUpper: true}); err == nil {
+		t.Fatalf("1桁でエラーが返されませんでした（結果 %q）", pw)
+	}
+}
+
 func TestGenerateExcludesDisabledCharsets(t *testing.T) {
 	enabled := []string{lowerChars, digitChars}
 	disabled := upperChars + symbolChars

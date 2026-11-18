@@ -15,7 +15,9 @@ func main() {
 
 	// 解析エラー時も終了コード1にするため、ContinueOnError で自前で処理する。
 	fs := flag.NewFlagSet("go-pass", flag.ContinueOnError)
-	fs.IntVar(&opts.Length, "l", opts.Length, fmt.Sprintf("パスワードの桁数（4〜%d）", password.MaxLength))
+	fs.IntVar(&opts.Length, "l", opts.Length, fmt.Sprintf("パスワードの桁数（最大%d）", password.MaxLength))
+	fs.BoolVar(&opts.NoSymbols, "ns", opts.NoSymbols, "記号を使わない")
+	fs.BoolVar(&opts.NoUpper, "nu", opts.NoUpper, "大文字を使わない")
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			os.Exit(0)

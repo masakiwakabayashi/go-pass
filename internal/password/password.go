@@ -27,6 +27,10 @@ const (
 type Options struct {
 	// Length は生成するパスワードの桁数。
 	Length int
+	// NoSymbols が true のとき、記号を使わない。
+	NoSymbols bool
+	// NoUpper が true のとき、大文字を使わない。
+	NoUpper bool
 }
 
 // DefaultOptions は既定の設定を返す。
@@ -34,12 +38,21 @@ func DefaultOptions() Options {
 	return Options{Length: DefaultLength}
 }
 
-// Generate は opts に従い、大文字・小文字・数字・記号をすべて含むパスワードを生成する。
+// Generate は opts に従ってパスワードを生成する。
+// 有効な文字種（既定では大文字・小文字・数字・記号）は、それぞれ最低1文字ずつ含まれる。
 func Generate(opts Options) (string, error) {
 	if opts.Length > MaxLength {
 		return "", fmt.Errorf("桁数（%d）は%d以下にしてください", opts.Length, MaxLength)
 	}
-	return generate(opts.Length, []string{upperChars, lowerChars, digitChars, symbolChars})
+
+	charsets := []string{lowerChars, digitChars}
+	if !opts.NoUpper {
+		charsets = append(charsets, upperChars)
+	}
+	if !opts.NoSymbols {
+		charsets = append(charsets, symbolChars)
+	}
+	return generate(opts.Length, charsets)
 }
 
 // generate は charsets の各文字種を最低1文字ずつ含む、length 桁のパスワードを生成する。

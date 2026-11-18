@@ -50,7 +50,8 @@ import "github.com/masakiwakabayashi/go-pass/internal/password"
 | --- | --- | --- |
 | `-l` | 桁数 | 12 |
 | `-n` | 生成する個数 | 1 |
-| `-no-symbols` | 記号を使わない | false |
+| `-ns` | 記号を使わない | false |
+| `-nu` | 大文字を使わない | false |
 
 フラグを追加するときは、`password` パッケージに設定用の構造体（例：`Options`）を置き、`main.go` ではフラグの値をその構造体に詰めて渡す。上記以外のフラグは、依頼があるまで追加しない。
 
